@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TEDx CUSAT — Ideas Worth Spreading</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,600;1,300&display=swap"
+        rel="stylesheet" />
+    <style>
+        :root {
+            --red: #E62B1E;
+            --black: #0a0a0a;
+            --white: #f5f0eb;
+            --gray: #1a1a1a;
+            --muted: #888;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--black);
+            color: var(--white);
+            font-family: 'DM Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* ── NAV ── */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 4rem;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .nav-logo {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.6rem;
+            letter-spacing: 2px;
+            color: var(--white);
+        }
+
+        .nav-logo span {
+            color: var(--red);
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2.5rem;
+        }
+
+        nav ul a {
+            text-decoration: none;
+            color: var(--muted);
+            font-size: 0.82rem;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            transition: color .2s;
+        }
+
+        nav ul a:hover {
+            color: var(--white);
+        }
+
+        .nav-cta {
+            background: var(--red);
+            color: var(--white) !important;
+            padding: 0.5rem 1.4rem;
+            border-radius: 2px;
+            transition: opacity .2s !important;
+        }
+
+        .nav-cta:hover {
+            opacity: 0.85;
+        }
+
+        /* ── HERO ── */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 8rem 4rem 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 80% 60% at 70% 40%, rgba(230, 43, 30, 0.12) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-eyebrow {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--red);
+            margin-bottom: 1.5rem;
+            animation: fadeUp .8s ease both;
+        }
+
+        .hero h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(4.5rem, 12vw, 10rem);
+            line-height: 0.92;
+            letter-spacing: 2px;
+            animation: fadeUp .8s ease .15s both;
+        }
+
+        .hero h1 .ted {
+            color: var(--red);
+        }
+
+        .hero-tagline {
+            margin-top: 2rem;
+            font-size: clamp(1rem, 2.5vw, 1.3rem);
+            font-weight: 300;
+            font-style: italic;
+            color: rgba(245, 240, 235, 0.65);
+            max-width: 480px;
+            line-height: 1.6;
+            animation: fadeUp .8s ease .3s both;
+        }
+
+        .hero-meta {
+            margin-top: 3rem;
+            display: flex;
+            gap: 3rem;
+            flex-wrap: wrap;
+            animation: fadeUp .8s ease .45s both;
+        }
+
+        .hero-meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .hero-meta-label {
+            font-size: 0.68rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .hero-meta-value {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .hero-actions {
+            margin-top: 3.5rem;
+            display: flex;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+            animation: fadeUp .8s ease .6s both;
+        }
+
+        .btn-primary {
+            background: var(--red);
+            color: var(--white);
+            padding: 0.9rem 2.4rem;
+            border: none;
+            border-radius: 2px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform .2s, box-shadow .2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(230, 43, 30, 0.35);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--white);
+            padding: 0.9rem 2.4rem;
+            border: 1px solid rgba(245, 240, 235, 0.25);
+            border-radius: 2px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            text-decoration: none;
+            transition: border-color .2s, transform .2s;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--white);
+            transform: translateY(-2px);
+        }
+
+        /* big decorative X */
+        .hero-deco {
+            position: absolute;
+            right: -2vw;
+            bottom: -8vh;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(20rem, 40vw, 38rem);
+            line-height: 1;
+            color: rgba(230, 43, 30, 0.04);
+            user-select: none;
+            pointer-events: none;
+            animation: fadeUp .8s ease .2s both;
+        }
+
+        /* ── ABOUT ── */
+        .section {
+            padding: 7rem 4rem;
+        }
+
+        .section-label {
+            font-size: 0.7rem;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: var(--red);
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+
+        .about {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5rem;
+            align-items: center;
+        }
+
+        .about-text h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            line-height: 1.05;
+            margin-bottom: 1.5rem;
+        }
+
+        .about-text p {
+            color: rgba(245, 240, 235, 0.65);
+            line-height: 1.8;
+            font-weight: 300;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .about-visual {
+            position: relative;
+            height: 340px;
+        }
+
+        .about-card {
+            position: absolute;
+            background: var(--gray);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 4px;
+            padding: 2rem;
+        }
+
+        .about-card.card-1 {
+            top: 0;
+            left: 0;
+            width: 70%;
+        }
+
+        .about-card.card-2 {
+            bottom: 0;
+            right: 0;
+            width: 65%;
+        }
+
+        .about-card-num {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 3rem;
+            color: var(--red);
+            line-height: 1;
+        }
+
+        .about-card-desc {
+            font-size: 0.82rem;
+            color: var(--muted);
+            margin-top: 0.4rem;
+            line-height: 1.5;
+        }
+
+        /* ── DIVIDER ── */
+        .divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.07);
+            margin: 0 4rem;
+        }
+
+        /* ── SPEAKERS ── */
+        .speakers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .speaker-card {
+            background: var(--gray);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 4px;
+            overflow: hidden;
+            transition: transform .25s, border-color .25s;
+            cursor: default;
+        }
+
+        .speaker-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(230, 43, 30, 0.4);
+        }
+
+        .speaker-img {
+            width: 100%;
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #1f1f1f 0%, #2a2a2a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .speaker-img::after {
+            content: attr(data-initials);
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 4rem;
+            color: rgba(255, 255, 255, 0.08);
+        }
+
+        .speaker-img .speaker-tag {
+            position: absolute;
+            bottom: 0.8rem;
+            left: 0.8rem;
+            background: var(--red);
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 0.3rem 0.6rem;
+            border-radius: 2px;
+        }
+
+        .speaker-info {
+            padding: 1.2rem;
+        }
+
+        .speaker-name {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .speaker-role {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-top: 0.3rem;
+        }
+
+        .speaker-topic {
+            font-size: 0.78rem;
+            color: rgba(245, 240, 235, 0.5);
+            margin-top: 0.6rem;
+            line-height: 1.5;
+            font-style: italic;
+        }
+
+        /* ── TICKETS ── */
+        .tickets {
+            background: var(--gray);
+        }
+
+        .tickets-inner {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5rem;
+            align-items: center;
+        }
+
+        .tickets h2 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            line-height: 1.05;
+            margin-bottom: 1rem;
+        }
+
+        .tickets p {
+            color: rgba(245, 240, 235, 0.55);
+            line-height: 1.8;
+            font-weight: 300;
+            margin-bottom: 2rem;
+        }
+
+        .ticket-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .ticket-tier {
+            background: var(--black);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: border-color .2s;
+        }
+
+        .ticket-tier.featured {
+            border-color: var(--red);
+        }
+
+        .ticket-tier:hover {
+            border-color: rgba(230, 43, 30, 0.5);
+        }
+
+        .tier-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .tier-perks {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-top: 0.25rem;
+        }
+
+        .tier-price {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 2rem;
+            color: var(--red);
+        }
+
+        .tier-price.free {
+            color: #4ade80;
+        }
+
+        /* ── REGISTER FORM ── */
+        .register-form {
+            margin-top: 2rem;
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .register-form input {
+            flex: 1;
+            min-width: 180px;
+            background: var(--black);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 2px;
+            padding: 0.85rem 1.2rem;
+            color: var(--white);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+        .register-form input:focus {
+            border-color: var(--red);
+        }
+
+        .register-form input::placeholder {
+            color: var(--muted);
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            padding: 3rem 4rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.07);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-logo {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.4rem;
+            letter-spacing: 2px;
+        }
+
+        .footer-logo span {
+            color: var(--red);
+        }
+
+        .footer-note {
+            font-size: 0.75rem;
+            color: var(--muted);
+            line-height: 1.6;
+            max-width: 400px;
+        }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 900px) {
+            nav {
+                padding: 1rem 1.5rem;
+            }
+
+            nav ul {
+                gap: 1.5rem;
+            }
+
+            .hero {
+                padding: 7rem 1.5rem 3rem;
+            }
+
+            .section {
+                padding: 5rem 1.5rem;
+            }
+
+            .divider {
+                margin: 0 1.5rem;
+            }
+
+            .about {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .about-visual {
+                display: none;
+            }
+
+            .tickets-inner {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            footer {
+                padding: 2rem 1.5rem;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 600px) {
+            nav ul {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 4rem;
+            }
+
+            .hero-deco {
+                display: none;
+            }
+
+            .hero-meta {
+                gap: 1.5rem;
+            }
+
+            .speakers-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAV -->
+    <nav>
+        <div class="nav-logo"><span>TED</span>x CUSAT</div>
+        <ul>
+            <li><a href="#about">About</a></li>
+            <li><a href="#speakers">Speakers</a></li>
+            <li><a href="#tickets" class="nav-cta">Get Tickets</a></li>
+        </ul>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero" id="home">
+        <div class="hero-eyebrow">Cochin University of Science & Technology</div>
+        <h1><span class="ted">TED</span>x<br>CUSAT</h1>
+        <p class="hero-tagline">Ideas worth spreading — a day of bold talks, raw curiosity, and conversations that move
+            the world.</p>
+        <div class="hero-meta">
+            <div class="hero-meta-item">
+                <span class="hero-meta-label">Date</span>
+                <span class="hero-meta-value">September 14, 2026</span>
+            </div>
+            <div class="hero-meta-item">
+                <span class="hero-meta-label">Venue</span>
+                <span class="hero-meta-value">CUSAT Auditorium, Kochi</span>
+            </div>
+            <div class="hero-meta-item">
+                <span class="hero-meta-label">Seats</span>
+                <span class="hero-meta-value">Limited — 400</span>
+            </div>
+        </div>
+        <div class="hero-actions">
+            <a href="#tickets" class="btn-primary">Get Your Ticket</a>
+            <a href="#speakers" class="btn-outline">Meet the Speakers</a>
+        </div>
+        <div class="hero-deco">X</div>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="section" id="about">
+        <div class="about">
+            <div class="about-text">
+                <div class="section-label">About TEDx</div>
+                <h2>More Than<br>A Talk.</h2>
+                <p>TEDx events are independently organized, bringing the spirit of TED to local communities. TEDx CUSAT
+                    is an event that gathers extraordinary minds from science, art, technology, and social change — all
+                    under one roof at Cochin University.</p>
+                <p>In the spirit of ideas worth spreading, TED has created a program called TEDx. TEDx events are fully
+                    planned and coordinated independently, on a community-by-community basis. The TED Conference
+                    provides general guidance for the TEDx program, but individual TEDx events are self-organized.</p>
+            </div>
+            <div class="about-visual">
+                <div class="about-card card-1">
+                    <div class="about-card-num">12+</div>
+                    <div class="about-card-desc">Visionary speakers across science, culture & technology</div>
+                </div>
+                <div class="about-card card-2">
+                    <div class="about-card-num">400</div>
+                    <div class="about-card-desc">Attendees ready to be inspired, challenged & connected</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- SPEAKERS -->
+    <section class="section" id="speakers">
+        <div class="section-label">2025 Lineup</div>
+        <h2
+            style="font-family:'Bebas Neue',sans-serif; font-size:clamp(2.5rem,5vw,4rem); line-height:1.05; margin-bottom:0.5rem;">
+            Meet the Speakers</h2>
+        <p style="color:rgba(245,240,235,0.5); font-weight:300; font-size:0.9rem;">Placeholder names — full lineup
+            announced soon.</p>
+        <div class="speakers-grid">
+
+            <div class="speaker-card">
+                <div class="speaker-img" data-initials="AR">
+                    <span class="speaker-tag">Keynote</span>
+                </div>
+                <div class="speaker-info">
+                    <div class="speaker-name">Anika Rao</div>
+                    <div class="speaker-role">Neuroscientist · IISc Bangalore</div>
+                    <div class="speaker-topic">"The Memory We Never Remember"</div>
+                </div>
+            </div>
+
+            <div class="speaker-card">
+                <div class="speaker-img" data-initials="KM">
+                    <span class="speaker-tag">Technology</span>
+                </div>
+                <div class="speaker-info">
+                    <div class="speaker-name">Karan Mehta</div>
+                    <div class="speaker-role">AI Researcher · Google DeepMind</div>
+                    <div class="speaker-topic">"When Machines Start Dreaming"</div>
+                </div>
+            </div>
+
+            <div class="speaker-card">
+                <div class="speaker-img" data-initials="PV">
+                    <span class="speaker-tag">Culture</span>
+                </div>
+                <div class="speaker-info">
+                    <div class="speaker-name">Priya Varma</div>
+                    <div class="speaker-role">Architect & Urban Planner</div>
+                    <div class="speaker-topic">"Cities That Listen"</div>
+                </div>
+            </div>
+
+            <div class="speaker-card">
+                <div class="speaker-img" data-initials="RS">
+                    <span class="speaker-tag">Social Change</span>
+                </div>
+                <div class="speaker-info">
+                    <div class="speaker-name">Rohan Sen</div>
+                    <div class="speaker-role">Climate Activist & Founder</div>
+                    <div class="speaker-topic">"The Radical Act of Staying Local"</div>
+                </div>
+            </div>
+
+            <div class="speaker-card">
+                <div class="speaker-img" data-initials="NA">
+                    <span class="speaker-tag">Arts</span>
+                </div>
+                <div class="speaker-info">
+                    <div class="speaker-name">Nisha Ajayan</div>
+                    <div class="speaker-role">Filmmaker & Storyteller</div>
+                    <div class="speaker-topic">"Silence as a Language"</div>
+                </div>
+            </div>
+
+            <div class="speaker-card">
+                <div class="speaker-img" data-initials="VK">
+                    <span class="speaker-tag">Science</span>
+                </div>
+                <div class="speaker-info">
+                    <div class="speaker-name">Vijay Kumar</div>
+                    <div class="speaker-role">Marine Biologist · CMFRI</div>
+                    <div class="speaker-topic">"Ocean Intelligence"</div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- TICKETS -->
+    <section class="section tickets" id="tickets">
+        <div class="tickets-inner">
+            <div>
+                <div class="section-label">Registration</div>
+                <h2>Secure Your<br>Spot Today.</h2>
+                <p>Seats are strictly limited to 400 attendees. Register early — last year's event sold out in under 48
+                    hours.</p>
+                <div class="register-form">
+                    <input type="text" placeholder="Your name" />
+                    <input type="email" placeholder="Email address" />
+                    <button class="btn-primary" style="white-space:nowrap;">Register Now</button>
+                </div>
+            </div>
+            <div class="ticket-cards">
+                <div class="ticket-tier">
+                    <div>
+                        <div class="tier-name">Student Pass</div>
+                        <div class="tier-perks">CUSAT student ID required · All sessions</div>
+                    </div>
+                    <div class="tier-price">₹199</div>
+                </div>
+                <div class="ticket-tier featured">
+                    <div>
+                        <div class="tier-name">General Admission</div>
+                        <div class="tier-perks">All sessions · Networking lunch · Kit</div>
+                    </div>
+                    <div class="tier-price">₹799</div>
+                </div>
+                <div class="ticket-tier">
+                    <div>
+                        <div class="tier-name">VIP Experience</div>
+                        <div class="tier-perks">Front row · Speaker meet & greet · Exclusive dinner</div>
+                    </div>
+                    <div class="tier-price">₹2499</div>
+                </div>
+                <div class="ticket-tier">
+                    <div>
+                        <div class="tier-name">Online Live Stream</div>
+                        <div class="tier-perks">Watch all talks live · Q&A access</div>
+                    </div>
+                    <div class="tier-price free">Free</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-logo"><span>TED</span>x CUSAT</div>
+        <div class="footer-note">
+            This independent TEDx event is operated under license from TED. TEDx events are planned and coordinated
+            independently, but in the spirit of TED's mission — ideas worth spreading.
+        </div>
+        <div style="font-size:0.75rem; color:var(--muted);">© 2025 TEDx CUSAT · Kochi, Kerala</div>
+    </footer>
+
+</body>
+
+</html>

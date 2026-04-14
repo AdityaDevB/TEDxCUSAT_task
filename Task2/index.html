@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOID RUNNER — Asteroid Dodge</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
+        :root {
+            --neon-cyan: #00f5ff;
+            --neon-pink: #ff006e;
+            --neon-yellow: #ffbe0b;
+            --dark-void: #03020a;
+            --deep-space: #0a0820;
+            --grid-line: rgba(0, 245, 255, 0.07);
+            --glow-cyan: 0 0 10px #00f5ff, 0 0 30px #00f5ff44;
+            --glow-pink: 0 0 10px #ff006e, 0 0 30px #ff006e44;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--dark-void);
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--neon-cyan);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Animated starfield background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                radial-gradient(1px 1px at 10% 20%, white 1px, transparent 0),
+                radial-gradient(1px 1px at 30% 80%, rgba(255, 255, 255, 0.6) 1px, transparent 0),
+                radial-gradient(1px 1px at 55% 15%, rgba(255, 255, 255, 0.8) 1px, transparent 0),
+                radial-gradient(1px 1px at 75% 60%, white 1px, transparent 0),
+                radial-gradient(1px 1px at 90% 35%, rgba(255, 255, 255, 0.5) 1px, transparent 0),
+                radial-gradient(1px 1px at 20% 50%, rgba(255, 255, 255, 0.7) 1px, transparent 0),
+                radial-gradient(1px 1px at 65% 90%, white 1px, transparent 0),
+                radial-gradient(1px 1px at 42% 42%, rgba(255, 255, 255, 0.4) 1px, transparent 0),
+                radial-gradient(1px 1px at 83% 12%, white 1px, transparent 0),
+                radial-gradient(1px 1px at 5% 70%, rgba(255, 255, 255, 0.6) 1px, transparent 0);
+            background-size: 300px 300px;
+            animation: drift 60s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Grid lines */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+            z-index: 0;
+            animation: gridMove 8s linear infinite;
+        }
+
+        @keyframes drift {
+            from {
+                background-position: 0 0;
+            }
+
+            to {
+                background-position: 300px 300px;
+            }
+        }
+
+        @keyframes gridMove {
+            from {
+                background-position: 0 0;
+            }
+
+            to {
+                background-position: 60px 60px;
+            }
+        }
+
+        /* ===== GAME WRAPPER ===== */
+        #game-wrapper {
+            position: relative;
+            z-index: 1;
+            width: 420px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* HUD */
+        #hud {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 4px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px;
+            letter-spacing: 2px;
+        }
+
+        #hud .label {
+            color: rgba(0, 245, 255, 0.5);
+            font-size: 10px;
+        }
+
+        #hud .val {
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--neon-cyan);
+            text-shadow: var(--glow-cyan);
+        }
+
+        #lives-display span {
+            display: inline-block;
+            font-size: 16px;
+            margin-left: 3px;
+            transition: opacity 0.3s;
+        }
+
+        #lives-display span.lost {
+            opacity: 0.15;
+            filter: grayscale(1);
+        }
+
+        /* ===== CANVAS ===== */
+        #gameCanvas {
+            border: 1px solid var(--neon-cyan);
+            box-shadow: var(--glow-cyan), inset 0 0 60px rgba(0, 245, 255, 0.03);
+            display: block;
+            background: var(--deep-space);
+            cursor: none;
+        }
+
+        /* ===== SCREENS ===== */
+        .screen {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 18px;
+            background: rgba(3, 2, 10, 0.92);
+            backdrop-filter: blur(4px);
+            z-index: 10;
+            padding: 30px;
+            text-align: center;
+            transition: opacity 0.4s;
+        }
+
+        .screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .screen-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 42px;
+            font-weight: 900;
+            color: var(--neon-cyan);
+            text-shadow: var(--glow-cyan);
+            letter-spacing: 4px;
+            line-height: 1;
+        }
+
+        .screen-sub {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            color: var(--neon-pink);
+            letter-spacing: 6px;
+            text-shadow: var(--glow-pink);
+        }
+
+        .screen-desc {
+            font-size: 13px;
+            color: rgba(0, 245, 255, 0.7);
+            line-height: 1.8;
+            max-width: 300px;
+        }
+
+        .screen-desc b {
+            color: var(--neon-yellow);
+        }
+
+        .btn {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            padding: 14px 36px;
+            background: transparent;
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--neon-cyan);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.2s;
+            z-index: -1;
+        }
+
+        .btn:hover {
+            color: var(--dark-void);
+            box-shadow: var(--glow-cyan);
+        }
+
+        .btn:hover::before {
+            transform: scaleX(1);
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .divider {
+            width: 80px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--neon-pink), transparent);
+        }
+
+        /* Score display on game-over */
+        .final-score-box {
+            border: 1px solid rgba(0, 245, 255, 0.3);
+            padding: 16px 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .final-score-box .big {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 36px;
+            font-weight: 900;
+            color: var(--neon-yellow);
+            text-shadow: 0 0 15px var(--neon-yellow);
+        }
+
+        /* Instructions grid */
+        .instructions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 20px;
+            font-size: 12px;
+            color: rgba(0, 245, 255, 0.75);
+            text-align: left;
+        }
+
+        .instructions .key {
+            color: var(--neon-yellow);
+            display: inline-block;
+            border: 1px solid rgba(255, 190, 11, 0.4);
+            padding: 1px 6px;
+            font-size: 11px;
+            margin-right: 4px;
+        }
+
+        #canvas-container {
+            position: relative;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="game-wrapper">
+        <!-- HUD -->
+        <div id="hud">
+            <div>
+                <div class="label">SCORE</div>
+                <div class="val" id="score-display">000000</div>
+            </div>
+            <div>
+                <div class="label">LEVEL</div>
+                <div class="val" id="level-display">01</div>
+            </div>
+            <div>
+                <div class="label">BEST</div>
+                <div class="val" id="highscore-display">000000</div>
+            </div>
+            <div style="text-align:right">
+                <div class="label">SHIELDS</div>
+                <div id="lives-display">
+                    <span id="h1">❤</span>
+                    <span id="h2">❤</span>
+                    <span id="h3">❤</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Canvas -->
+        <div id="canvas-container">
+            <canvas id="gameCanvas" width="420" height="560"></canvas>
+
+            <!-- START SCREEN -->
+            <div class="screen" id="start-screen">
+                <div class="screen-sub">// DEEP SPACE SURVIVAL //</div>
+                <div class="screen-title">VOID<br>RUNNER</div>
+                <div class="divider"></div>
+                <div class="screen-desc">
+                    Navigate your ship through asteroid fields.<br>
+                    <b>Survive as long as possible</b> while collecting
+                    <b style="color:var(--neon-cyan)">energy orbs</b> for bonus points.<br><br>
+
+                    <span style="color:var(--neon-yellow); font-weight:700;">
+                        🚀 OBJECTIVE:
+                    </span><br>
+                    Reach <b>LEVEL 5</b> + <b>3000 SCORE</b><br>
+                    to <span style="color:var(--neon-yellow)">ESCAPE THE VOID</span>
+                </div>
+                <div class="instructions">
+                    <div><span class="key">←→</span> Move ship</div>
+                    <div><span class="key">MOUSE</span> Aim ship</div>
+                    <div><span class="key">3 LIVES</span> Shields</div>
+                    <div><span class="key">ORBS</span> +50 pts</div>
+                </div>
+                <button class="btn" id="start-btn">LAUNCH MISSION</button>
+            </div>
+
+            <!-- GAME OVER SCREEN -->
+            <div class="screen hidden" id="gameover-screen">
+                <div class="screen-sub">// MISSION FAILED //</div>
+                <div class="screen-title"
+                    style="font-size:32px; color: var(--neon-pink); text-shadow: var(--glow-pink)">SHIP<br>DESTROYED
+                </div>
+                <div class="final-score-box">
+                    <div class="label">FINAL SCORE</div>
+                    <div class="big" id="final-score">000000</div>
+                    <div class="label" id="final-level">REACHED LEVEL 01</div>
+                </div>
+                <div class="divider"></div>
+                <button class="btn" id="restart-btn">RETRY MISSION</button>
+                <button class="btn" id="home-btn">MAIN MENU</button>
+            </div>
+
+            <!-- WIN SCREEN -->
+            <div class="screen hidden" id="win-screen">
+                <div class="screen-sub">// MISSION COMPLETE //</div>
+                <div class="screen-title"
+                    style="font-size:30px; color: var(--neon-yellow); text-shadow: 0 0 20px var(--neon-yellow)">
+                    SECTOR<br>CLEARED</div>
+                <div class="final-score-box">
+                    <div class="label">FINAL SCORE</div>
+                    <div class="big" id="win-score">000000</div>
+                </div>
+                <div class="screen-desc" style="color: rgba(255,190,11,0.8)">
+                    You survived all 5 levels and escaped the void!
+                </div>
+                <button class="btn" id="win-restart-btn">PLAY AGAIN</button>
+                <button class="btn" id="win-home-btn">MAIN MENU</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width, H = canvas.height;
+
+        // ── State ──
+        let state = 'start'; // start | playing | dead | win
+        let score, lives, level, frame, asteroids, orbs, particles, ship, flash;
+        let keys = {};
+        let mouseX = W / 2;
+        let highScore = localStorage.getItem('highScore') || 0;
+
+
+        canvas.addEventListener('mousemove', e => {
+            const rect = canvas.getBoundingClientRect();
+            mouseX = e.clientX - rect.left;
+        });
+
+        document.addEventListener('keydown', e => { keys[e.key] = true; });
+        document.addEventListener('keyup', e => { keys[e.key] = false; });
+
+        // ── Init ──
+        function initGame() {
+            score = 0;
+            lives = 3;
+            level = 1;
+            frame = 0;
+            flash = 0;
+            asteroids = [];
+            orbs = [];
+            particles = [];
+            ship = { x: W / 2, y: H - 70, w: 22, h: 32, invincible: 0, trail: [] };
+            updateHUD();
+            state = 'playing';
+            hideAllScreens();
+        }
+
+        function updateHUD() {
+            document.getElementById('score-display').textContent = String(score).padStart(6, '0');
+            document.getElementById('level-display').textContent = String(level).padStart(2, '0');
+            document.getElementById('highscore-display').textContent = String(highScore).padStart(6, '0');
+
+            const hearts = ['h1', 'h2', 'h3'];
+            hearts.forEach((id, i) => {
+                document.getElementById(id).className = i < lives ? '' : 'lost';
+            });
+        }
+
+        function hideAllScreens() {
+            ['start-screen', 'gameover-screen', 'win-screen'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+        }
+
+        // ── Asteroid spawning ──
+        function spawnAsteroid() {
+            const size = 18 + Math.random() * 22 + level * 2;
+            const x = size + Math.random() * (W - size * 2);
+            const speed = 1.2 + Math.random() * 1.5 + level * 0.25;
+            const drift = (Math.random() - 0.5) * 1.2;
+            const spin = (Math.random() - 0.5) * 0.04;
+            const sides = Math.floor(6 + Math.random() * 5);
+            const verts = [];
+            for (let i = 0; i < sides; i++) {
+                const a = (i / sides) * Math.PI * 2;
+                const r = size * (0.7 + Math.random() * 0.3);
+                verts.push({ x: Math.cos(a) * r, y: Math.sin(a) * r });
+            }
+            asteroids.push({ x, y: -size, size, speed, drift, angle: 0, spin, verts });
+        }
+
+        function spawnOrb() {
+            const x = 20 + Math.random() * (W - 40);
+            orbs.push({ x, y: -10, speed: 1.5 + Math.random(), pulse: Math.random() * Math.PI * 2 });
+        }
+
+        // ── Particle burst ──
+        function burst(x, y, color, n = 10) {
+            for (let i = 0; i < n; i++) {
+                const a = Math.random() * Math.PI * 2;
+                const spd = 1 + Math.random() * 4;
+                particles.push({
+                    x, y,
+                    vx: Math.cos(a) * spd,
+                    vy: Math.sin(a) * spd,
+                    life: 1,
+                    decay: 0.02 + Math.random() * 0.03,
+                    color,
+                    size: 1 + Math.random() * 3
+                });
+            }
+        }
+
+        // ── Draw ship ──
+        function drawShip(x, y, invincible) {
+            const alpha = (invincible > 0 && Math.floor(frame / 4) % 2 === 0) ? 0.3 : 1;
+            ctx.save();
+            ctx.globalAlpha = alpha;
+            ctx.translate(x, y);
+
+            // Engine glow
+            const eg = ctx.createRadialGradient(0, 20, 2, 0, 20, 18);
+            eg.addColorStop(0, 'rgba(0,245,255,0.8)');
+            eg.addColorStop(1, 'transparent');
+            ctx.fillStyle = eg;
+            ctx.beginPath(); ctx.ellipse(0, 20, 10, 16, 0, 0, Math.PI * 2); ctx.fill();
+
+            // Body
+            ctx.strokeStyle = '#00f5ff';
+            ctx.lineWidth = 1.5;
+            ctx.shadowColor = '#00f5ff';
+            ctx.shadowBlur = 10;
+            ctx.fillStyle = '#0a1a2e';
+            ctx.beginPath();
+            ctx.moveTo(0, -32);
+            ctx.lineTo(20, 16);
+            ctx.lineTo(10, 8);
+            ctx.lineTo(-10, 8);
+            ctx.lineTo(-20, 16);
+            ctx.closePath();
+            ctx.fill(); ctx.stroke();
+
+            // Cockpit
+            ctx.fillStyle = 'rgba(0,245,255,0.3)';
+            ctx.beginPath();
+            ctx.ellipse(0, -10, 6, 10, 0, 0, Math.PI * 2);
+            ctx.fill(); ctx.stroke();
+
+            ctx.restore();
+        }
+
+        // ── Draw asteroid ──
+        function drawAsteroid(a) {
+            ctx.save();
+            ctx.translate(a.x, a.y);
+            ctx.rotate(a.angle);
+            ctx.strokeStyle = 'rgba(180,100,50,0.9)';
+            ctx.fillStyle = 'rgba(60,30,10,0.8)';
+            ctx.lineWidth = 1.5;
+            ctx.shadowColor = 'rgba(255,120,50,0.4)';
+            ctx.shadowBlur = 8;
+            ctx.beginPath();
+            ctx.moveTo(a.verts[0].x, a.verts[0].y);
+            a.verts.forEach(v => ctx.lineTo(v.x, v.y));
+            ctx.closePath();
+            ctx.fill(); ctx.stroke();
+            ctx.restore();
+        }
+
+        // ── Draw orb ──
+        function drawOrb(o) {
+            const pulse = Math.sin(o.pulse) * 3;
+            const g = ctx.createRadialGradient(o.x, o.y, 1, o.x, o.y, 10 + pulse);
+            g.addColorStop(0, '#ffbe0b');
+            g.addColorStop(0.5, 'rgba(255,190,11,0.5)');
+            g.addColorStop(1, 'transparent');
+            ctx.fillStyle = g;
+            ctx.beginPath();
+            ctx.arc(o.x, o.y, 10 + pulse, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(255,190,11,0.9)';
+            ctx.lineWidth = 1;
+            ctx.shadowColor = '#ffbe0b';
+            ctx.shadowBlur = 12;
+            ctx.beginPath();
+            ctx.arc(o.x, o.y, 5, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+
+        // ── Collision ──
+        function dist(a, b) {
+            return Math.hypot(a.x - b.x, a.y - b.y);
+        }
+
+        // ── Main loop ──
+        function tick() {
+            requestAnimationFrame(tick);
+            if (state !== 'playing') return;
+            frame++;
+
+            // Move ship
+            const targetX = mouseX;
+            ship.x += (targetX - ship.x) * 0.12;
+            if (keys['ArrowLeft'] || keys['a']) ship.x -= 4;
+            if (keys['ArrowRight'] || keys['d']) ship.x += 4;
+            ship.x = Math.max(22, Math.min(W - 22, ship.x));
+            if (ship.invincible > 0) ship.invincible--;
+
+            // Trail
+            ship.trail.unshift({ x: ship.x, y: ship.y });
+            if (ship.trail.length > 12) ship.trail.pop();
+
+            // Spawn schedule — gets tighter each level
+            const spawnRate = Math.max(18, 55 - level * 7);
+            if (frame % spawnRate === 0) spawnAsteroid();
+            if (frame % 90 === 0) spawnOrb();
+
+            // Level up every 500 pts
+            const newLevel = Math.min(5, Math.floor(score / 500) + 1);
+            if (newLevel > level) { level = newLevel; updateHUD(); }
+
+            // Score per frame survived
+            if (frame % 30 === 0) { score += level; updateHUD(); }
+
+            // Move & clean asteroids
+            asteroids = asteroids.filter(a => {
+                a.y += a.speed;
+                a.x += a.drift;
+                a.angle += a.spin;
+
+                // Check collision with ship
+                if (ship.invincible === 0 && dist(a, { x: ship.x, y: ship.y }) < a.size * 0.75) {
+                    burst(ship.x, ship.y, '#ff006e', 20);
+                    flash = 12;
+                    lives--;
+                    updateHUD();
+                    ship.invincible = 90;
+                    if (lives <= 0) { gameOver(); return false; }
+                    return false;
+                }
+                return a.y < H + a.size * 2;
+            });
+
+            // Move & clean orbs
+            orbs = orbs.filter(o => {
+                o.y += o.speed;
+                o.pulse += 0.08;
+                if (dist(o, { x: ship.x, y: ship.y }) < 18) {
+                    burst(o.x, o.y, '#ffbe0b', 8);
+                    score += 50;
+                    updateHUD();
+                    return false;
+                }
+                return o.y < H + 20;
+            });
+
+            // Particles
+            particles = particles.filter(p => {
+                p.x += p.vx; p.y += p.vy;
+                p.vy += 0.1;
+                p.life -= p.decay;
+                return p.life > 0;
+            });
+
+            // Win condition
+            if (level === 5 && score >= 3000) { winGame(); return; }
+
+            // ── DRAW ──
+            ctx.clearRect(0, 0, W, H);
+
+            // Flash overlay on hit
+            if (flash > 0) {
+                ctx.fillStyle = `rgba(255,0,110,${flash / 80})`;
+                ctx.fillRect(0, 0, W, H);
+                flash--;
+            }
+
+            // Ship trail
+            ship.trail.forEach((t, i) => {
+                const a = 1 - i / ship.trail.length;
+                ctx.fillStyle = `rgba(0,245,255,${a * 0.15})`;
+                ctx.beginPath();
+                ctx.ellipse(t.x, t.y + 20, 6 * a, 10 * a, 0, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Asteroids
+            asteroids.forEach(drawAsteroid);
+
+            // Orbs
+            orbs.forEach(drawOrb);
+
+            // Particles
+            particles.forEach(p => {
+                ctx.save();
+                ctx.globalAlpha = p.life;
+                ctx.fillStyle = p.color;
+                ctx.shadowColor = p.color;
+                ctx.shadowBlur = 6;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+
+            // Ship
+            drawShip(ship.x, ship.y, ship.invincible);
+
+            // Custom cursor cross
+            ctx.save();
+            ctx.strokeStyle = 'rgba(0,245,255,0.4)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([3, 4]);
+            ctx.beginPath(); ctx.moveTo(mouseX, 0); ctx.lineTo(mouseX, H); ctx.stroke();
+            ctx.restore();
+        }
+
+        function gameOver() {
+            state = 'dead';
+
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('highScore', highScore);
+            }
+
+            updateHUD();
+
+            document.getElementById('final-score').textContent = String(score).padStart(6, '0');
+            document.getElementById('final-level').textContent = `REACHED LEVEL ${String(level).padStart(2, '0')}`;
+            document.getElementById('gameover-screen').classList.remove('hidden');
+        }
+
+        function winGame() {
+            state = 'win';
+
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('highScore', highScore);
+            }
+
+            updateHUD();
+
+            document.getElementById('win-score').textContent = String(score).padStart(6, '0');
+            document.getElementById('win-screen').classList.remove('hidden');
+        }
+
+        function goHome() {
+            state = 'start';
+            document.getElementById('start-screen').classList.remove('hidden');
+            document.getElementById('gameover-screen').classList.add('hidden');
+            document.getElementById('win-screen').classList.add('hidden');
+        }
+
+        // ── Button handlers ──
+        document.getElementById('start-btn').onclick = initGame;
+        document.getElementById('restart-btn').onclick = initGame;
+        document.getElementById('home-btn').onclick = goHome;
+        document.getElementById('win-home-btn').onclick = goHome;
+        document.getElementById('win-restart-btn').onclick = initGame;
+
+        // Start loop
+        tick();
+    </script>
+</body>
+
+</html>
